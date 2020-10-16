@@ -14,19 +14,35 @@ def create_app(test_config=None):
   setup_db(app)
   
   '''
-  @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
+  Setuo CORS. Allow '*' for origins.
   '''
+  CORS(app, resources={'/': {'origins': '*'}})
 
   '''
-  @TODO: Use the after_request decorator to set Access-Control-Allow
+  Set Access-Control-Allow
   '''
+  # CORS Headers
+  @app.after_request
+  def after_request(response):
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
   '''
-  @TODO: 
-  Create an endpoint to handle GET requests 
-  for all available categories.
+  Handle GET requests for all available categories.
   '''
+  @app.route('/categories')
+  def get_categories():
+    categories = Category.query.order_by(Category.type).all()
+    categories_dict = {category.id: category.type for category in categories}
 
+    if len(categories) == 0:
+      abort(404)
+
+    return jsonify({
+      'success': True,
+      'categories': categories_dict
+    })
 
   '''
   @TODO: 
@@ -98,7 +114,39 @@ def create_app(test_config=None):
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
-  
+  @app.errorhandler(400)
+  def bad_request(error):
+    return jsonify({
+        'success': False,
+        'error': 400,
+        'message': 'Bad Request'
+    }), 400
+
+  @app.errorhandler(404)
+  def not_found(error):
+    return jsonify({
+        'success': False,
+        'error': 404,
+        'message': 'Not Found'
+    }), 404
+
+  @app.errorhandler(422)
+  def unprocessable_entity(error):
+    return jsonify({
+        'success': False,
+        'error': 422,
+        'message': 'Unprocessable Entity'
+    }), 422
+
+  @app.errorhandler(500)
+  def internal_server_error(error):
+    return jsonify({
+        'success': False,
+        'error': 500,
+        'message': 'Internal Server Error'
+    }), 500
+
+
   return app
 
     
