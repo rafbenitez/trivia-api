@@ -71,6 +71,10 @@ class Category(db.Model):
   def __init__(self, type):
     self.type = type
 
+  def get_all():
+    categories = Category.query.order_by(Category.type).all()
+    return {category.id: category.type for category in categories}
+
   def format(self):
     return {
       'id': self.id,
