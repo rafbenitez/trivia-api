@@ -18,6 +18,13 @@ class TriviaTestCase(unittest.TestCase):
         self.database_path = "postgres://{}/{}".format('localhost:5432', self.database_name)
         setup_db(self.app, self.database_path)
 
+        self.new_question = {
+            'question': 'Such a great question',
+            'answer': 'this is the answer',
+            'category': 4,
+            'difficulty': 3
+        }
+
         # binds the app to the current context
         with self.app.app_context():
             self.db = SQLAlchemy()
@@ -103,6 +110,18 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['error'], 422)
         self.assertEqual(data['message'], 'Unprocessable Entity')
 
+    """
+    Tests for /questions POST endpoint
+    """
+    def test_create_new_question(self):
+        res = self.client().post('/questions', json=self.new_question)
+        data = json.loads(res.data)
+        pass
+
+    def test_422_if_question_creation_fails(self):
+        res = self.client().post('/questions', json=self.new_question)
+        data = json.loads(res.data)
+        pass
 
 
 # Make the tests conveniently executable
