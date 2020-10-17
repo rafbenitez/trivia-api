@@ -7,7 +7,9 @@ class Search extends Component {
 
   getInfo = (event) => {
     event.preventDefault();
-    this.props.submitSearch(this.state.query)
+    if (this.state.query) {
+      this.props.submitSearch(this.state.query)
+    }
   }
 
   handleInputChange = () => {

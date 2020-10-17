@@ -123,6 +123,26 @@ class TriviaTestCase(unittest.TestCase):
         data = json.loads(res.data)
         pass
 
+    def test_post_question_search_with_results(self):
+        res = self.client().post('/questions', json={'searchTerm': 'title'})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['questions'])
+        self.assertTrue(len(data['questions']))
+        self.assertTrue(data['total_questions'])
+        self.assertIn('current_category', data)
+
+    def test_post_question_search_without_results(self):
+        res = self.client().post('/questions', json={'searchTerm': 'junk'})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertIn('questions',data)
+        self.assertEqual(len(data['questions']), 0)
+        self.assertEqual(data['total_questions'], 0)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

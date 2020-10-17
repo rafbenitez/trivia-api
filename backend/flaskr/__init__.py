@@ -106,13 +106,7 @@ def create_app(test_config=None):
       abort(422)
 
   '''
-  Handle POST requests for new questions,
-  which will require the question and answer text,
-  category, and difficulty score.
-
-  TEST: When you submit a question on the "Add" tab,
-  the form will clear and the question will appear at the end of the last page
-  of the questions list in the "List" tab.
+  Handle POST requests for new questions and search requests
   '''
   @app.route('/questions', methods=['POST'])
   def create_question():
@@ -122,29 +116,31 @@ def create_app(test_config=None):
     new_answer = body.get('answer', None)
     new_category = body.get('category', None)
     new_difficulty = body.get('difficulty', None)
+    search_term = body.get('searchTerm', None)
 
     try:
-      question = Question(question=new_question, answer=new_answer, category=new_category, difficulty=new_difficulty)
-      question.insert()
+      if search_term:
+        selection = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(search_term)))
+        current_questions = paginate_questions(request, selection)
 
-      return jsonify({
-        'success': True,
-        'created': question.id
-      })
+        return jsonify({
+          'success': True,
+          'questions': current_questions,
+          'total_questions': len(selection.all()),
+          'current_category': None
+        })
+
+      else:
+        question = Question(question=new_question, answer=new_answer, category=new_category, difficulty=new_difficulty)
+        question.insert()
+
+        return jsonify({
+          'success': True,
+          'created': question.id
+        })
 
     except:
       abort(422)
-
-  '''
-  @TODO: 
-  Create a POST endpoint to get questions based on a search term. 
-  It should return any questions for whom the search term 
-  is a substring of the question. 
-
-  TEST: Search by any phrase. The questions list will update to include 
-  only question that include that string within their question. 
-  Try using the word "title" to start. 
-  '''
 
   '''
   @TODO: 
