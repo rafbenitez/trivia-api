@@ -111,25 +111,32 @@ def create_app(test_config=None):
   def create_question():
     body = request.get_json()
 
-    new_question = body.get('question', None)
-    new_answer = body.get('answer', None)
-    new_category = body.get('category', None)
-    new_difficulty = body.get('difficulty', None)
     search_term = body.get('searchTerm', None)
 
-    try:
-      if search_term:
-        selection = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(search_term))).all()
-        current_questions = paginate_questions(request, selection)
+    if search_term:
+      selection = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(search_term))).all()
+      if len(selection) == 0:
+        abort(404)
 
-        return jsonify({
-          'success': True,
-          'questions': current_questions,
-          'total_questions': len(selection),
-          'current_category': None
-        })
+      current_questions = paginate_questions(request, selection)
 
-      else:
+      return jsonify({
+        'success': True,
+        'questions': current_questions,
+        'total_questions': len(selection),
+        'current_category': None
+      })
+
+    else:
+      new_question = body.get('question', None)
+      new_answer = body.get('answer', None)
+      new_category = body.get('category', None)
+      new_difficulty = body.get('difficulty', None)
+
+      if new_question is None or new_answer is None or new_category is None or new_difficulty is None:
+        abort(422)
+
+      try:
         question = Question(question=new_question, answer=new_answer, category=new_category, difficulty=new_difficulty)
         question.insert()
 
@@ -137,9 +144,8 @@ def create_app(test_config=None):
           'success': True,
           'created': question.id
         })
-
-    except:
-      abort(422)
+      except:
+        abort(422)
 
   '''
   Handle GET requests for questions based on category.

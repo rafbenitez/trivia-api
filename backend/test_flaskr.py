@@ -144,12 +144,22 @@ class TriviaTestCase(unittest.TestCase):
   def test_create_new_question(self):
     res = self.client().post('/questions', json=self.new_question)
     data = json.loads(res.data)
-    pass
+
+    self.assertEqual(res.status_code, 200)
+    self.assertEqual(data['success'], True)
+    self.assertTrue(data['created'])
+
+    question = Question.query.filter_by(id=data['created']).one_or_none()
+    self.assertIsNotNone(question)
 
   def test_422_if_question_creation_fails(self):
-    res = self.client().post('/questions', json=self.new_question)
+    res = self.client().post('/questions', json={})
     data = json.loads(res.data)
-    pass
+
+    self.assertEqual(res.status_code, 422)
+    self.assertEqual(data['success'], False)
+    self.assertEqual(data['error'], 422)
+    self.assertEqual(data['message'], 'Unprocessable Entity')
 
   def test_post_question_search_with_results(self):
     res = self.client().post('/quizzes', json={'previous_questions': [], 'quiz_category': {'type': '', 'id': 0}})
