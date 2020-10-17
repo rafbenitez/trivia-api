@@ -43,14 +43,14 @@ def create_app(test_config=None):
   '''
   @app.route('/categories')
   def get_categories():
-    categories_dict = Category.get_all()
+    categories = Category.get_all()
 
-    if len(categories_dict) == 0:
+    if len(categories) == 0:
       abort(404)
 
     return jsonify({
       'success': True,
-      'categories': categories_dict
+      'categories': categories
     })
 
   '''
@@ -164,16 +164,40 @@ def create_app(test_config=None):
     })
 
   '''
-  @TODO: 
-  Create a POST endpoint to get questions to play the quiz. 
-  This endpoint should take category and previous question parameters 
-  and return a random questions within the given category, 
-  if provided, and that is not one of the previous questions. 
+  Handle POST requests for questions to play the quiz.
+  This endpoint should take category and previous question parameters
+  and return a random questions within the given category,
+  if provided, and that is not one of the previous questions.
 
   TEST: In the "Play" tab, after a user selects "All" or a category,
   one question at a time is displayed, the user is allowed to answer
-  and shown whether they were correct or not. 
+  and shown whether they were correct or not.
   '''
+  @app.route('/quizzes', methods=['POST'])
+  def get_quiz_questions():
+    body = request.get_json()
+
+    previous_questions = body.get('previous_questions', None)
+    quiz_category = body.get('quiz_category', None)
+
+    try:
+      if quiz_category['id']:
+        questions = Question.query.filter(Question.category == quiz_category['id']).all()
+      else:
+        questions = Question.query.all()
+
+      new_questions = list({q.id for q in questions}.difference({p for p in previous_questions}))
+      if len(new_questions):
+        next_question = [q for q in questions if q.id == new_questions[0]][0].format()
+      else:
+        next_question = None
+
+      return jsonify({
+        'success': True,
+        'question': next_question
+      })
+    except:
+      abort(400)
 
   '''
   Error handlers for all expected errors
