@@ -75,11 +75,10 @@ def create_app(test_config=None):
     return jsonify({
       'success': True,
       'questions': current_questions,
-      'total_questions': len(Question.query.all()),
+      'total_questions': len(selection),
       'categories': Category.get_all(),
       'current_category': None
     })
-
 
   '''
   Handle DELETE requests for a question using a question ID.
@@ -120,13 +119,13 @@ def create_app(test_config=None):
 
     try:
       if search_term:
-        selection = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(search_term)))
+        selection = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(search_term))).all()
         current_questions = paginate_questions(request, selection)
 
         return jsonify({
           'success': True,
           'questions': current_questions,
-          'total_questions': len(selection.all()),
+          'total_questions': len(selection),
           'current_category': None
         })
 
@@ -143,14 +142,26 @@ def create_app(test_config=None):
       abort(422)
 
   '''
-  @TODO: 
-  Create a GET endpoint to get questions based on category. 
+  Handle GET requests for questions based on category.
 
-  TEST: In the "List" tab / main screen, clicking on one of the 
-  categories in the left column will cause only questions of that 
-  category to be shown. 
+  TEST: In the "List" tab / main screen, clicking on one of the
+  categories in the left column will cause only questions of that
+  category to be shown.
   '''
+  @app.route('/categories/<int:category_id>/questions')
+  def get_questions_by_category(category_id):
+    selection = Question.query.filter(Question.category == category_id).all()
+    current_questions = paginate_questions(request, selection)
 
+    if len(current_questions) == 0:
+      abort(404)
+
+    return jsonify({
+      'success': True,
+      'questions': current_questions,
+      'total_questions': len(selection),
+      'current_category': category_id
+    })
 
   '''
   @TODO: 
