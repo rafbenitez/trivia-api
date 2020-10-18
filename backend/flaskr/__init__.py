@@ -24,7 +24,7 @@ def create_app(test_config=None):
   setup_db(app)
 
   '''
-  Setuo CORS. Allow '*' for origins.
+  Setup CORS. Allow '*' for origins.
   '''
   CORS(app, resources={'/': {'origins': '*'}})
 
@@ -54,15 +54,7 @@ def create_app(test_config=None):
     })
 
   '''
-  Handle GET requests for questions,
-  including pagination (every 10 questions).
-  This endpoint should return a list of questions,
-  number of total questions, current category, categories.
-
-  TEST: At this point, when you start the application
-  you should see questions and categories generated,
-  ten questions per page and pagination at the bottom of the screen for three pages.
-  Clicking on the page numbers should update the questions.
+  Handle GET requests for questions, including pagination (every 10 questions).
   '''
   @app.route('/questions')
   def get_questions():
@@ -82,9 +74,6 @@ def create_app(test_config=None):
 
   '''
   Handle DELETE requests for a question using a question ID.
-
-  TEST: When you click the trash icon next to a question, the question will be removed.
-  This removal will persist in the database and when you refresh the page.
   '''
   @app.route('/questions/<int:question_id>', methods=['DELETE'])
   def delete_question(question_id):
@@ -105,7 +94,7 @@ def create_app(test_config=None):
       abort(422)
 
   '''
-  Handle POST requests for new questions and search requests
+  Handle POST requests for new questions and search requests.
   '''
   @app.route('/questions', methods=['POST'])
   def create_question():
@@ -148,11 +137,7 @@ def create_app(test_config=None):
         abort(422)
 
   '''
-  Handle GET requests for questions based on category.
-
-  TEST: In the "List" tab / main screen, clicking on one of the
-  categories in the left column will cause only questions of that
-  category to be shown.
+  Handle GET requests for questions based on a category ID.
   '''
   @app.route('/categories/<int:category_id>/questions')
   def get_questions_by_category(category_id):
@@ -171,13 +156,6 @@ def create_app(test_config=None):
 
   '''
   Handle POST requests for questions to play the quiz.
-  This endpoint should take category and previous question parameters
-  and return a random questions within the given category,
-  if provided, and that is not one of the previous questions.
-
-  TEST: In the "Play" tab, after a user selects "All" or a category,
-  one question at a time is displayed, the user is allowed to answer
-  and shown whether they were correct or not.
   '''
   @app.route('/quizzes', methods=['POST'])
   def get_quiz_questions():
@@ -206,7 +184,7 @@ def create_app(test_config=None):
       abort(400)
 
   '''
-  Error handlers for all expected errors
+  Error handlers for all expected errors.
   '''
   @app.errorhandler(400)
   def bad_request(error):
@@ -239,6 +217,5 @@ def create_app(test_config=None):
         'error': 500,
         'message': 'Internal Server Error'
     }), 500
-
 
   return app
