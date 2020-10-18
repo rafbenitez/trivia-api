@@ -166,13 +166,13 @@ def create_app(test_config=None):
 
     try:
       if quiz_category['id']:
-        questions = Question.query.filter(Question.category == quiz_category['id']).all()
+        questions = Question.query.filter(Question.category == quiz_category['id'])
       else:
-        questions = Question.query.all()
+        questions = Question.query
+      new_questions = questions.filter(Question.id.notin_(previous_questions)).all()
 
-      new_questions = list({q.id for q in questions}.difference({p for p in previous_questions}))
       if len(new_questions):
-        next_question = [q for q in questions if q.id == new_questions[0]][0].format()
+        next_question = new_questions[random.randrange(0, len(new_questions))].format()
       else:
         next_question = None
 
