@@ -136,7 +136,7 @@ class TriviaTestCase(unittest.TestCase):
   """
   Tests for /questions POST endpoint
   """
-  def test_create_new_question(self):
+  def test_post_create_new_question(self):
     res = self.client().post('/questions', json=self.new_question)
     data = json.loads(res.data)
 
@@ -156,6 +156,29 @@ class TriviaTestCase(unittest.TestCase):
     self.assertEqual(data['error'], 422)
     self.assertEqual(data['message'], 'Unprocessable Entity')
 
+  def test_post_search_questions_with_results(self):
+    res = self.client().post('/questions', json={"searchTerm": "beetle"})
+    data = json.loads(res.data)
+
+    self.assertEqual(res.status_code, 200)
+    self.assertEqual(data['success'], True)
+    self.assertTrue(data['questions'])
+    self.assertTrue(len(data['questions']))
+    self.assertTrue(data['total_questions'])
+    self.assertIn('current_category', data)
+
+  def test_404_search_questions_without_results(self):
+    res = self.client().post('/questions', json={"searchTerm": "junktext"})
+    data = json.loads(res.data)
+
+    self.assertEqual(res.status_code, 404)
+    self.assertEqual(data['success'], False)
+    self.assertEqual(data['error'], 404)
+    self.assertEqual(data['message'], 'Not Found')
+
+  """
+  Tests for /quizzes POST endpoint
+  """
   def test_post_question_search_with_results(self):
     res = self.client().post('/quizzes', json={'previous_questions': [], 'quiz_category': {'type': '', 'id': 0}})
     data = json.loads(res.data)
